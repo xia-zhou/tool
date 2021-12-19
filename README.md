@@ -1,1 +1,14 @@
-# tool
+# tool（工具合集）
+## 短链接服务
+### 简介
+### 实现思路
+### 相关依赖
+## RPC学习DEMO
+## MQ学习DEMO
+## 多线程学习DEMO
+## 数据库连接池DEMO
+## Jedis连接池学习DEMO
+## EventBus学习DEMO
+## MyBaties学习DEMO
+## Faas学习DEMO
+## 响应式学习DEMO
