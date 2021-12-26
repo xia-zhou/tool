@@ -1,3 +1,4 @@
+-- mysql 表结构初始化
 create table area
 (
     id   int unsigned NOT NULL AUTO_INCREMENT,
