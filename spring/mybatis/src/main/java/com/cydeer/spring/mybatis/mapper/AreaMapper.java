@@ -5,12 +5,14 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author song.z
  * @date 2021/12/31 4:16 下午
  */
 @Mapper
+@Repository
 public interface AreaMapper {
 
     /**
