@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 /**
  * @author song.z
- * @date 2022/02/13 20:48:38
+ * @date 2022/02/13 20:52:05
  */
 @Mapper
 public interface AgentShortUrlMapper {
