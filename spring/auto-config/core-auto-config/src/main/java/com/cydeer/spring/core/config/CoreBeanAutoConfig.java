@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnClass(CoreBean.class)
-public class CoreBeanAuthConfig {
+public class CoreBeanAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean(CoreBean.class)
