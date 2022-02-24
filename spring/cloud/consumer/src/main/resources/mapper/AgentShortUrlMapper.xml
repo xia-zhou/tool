@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cydeer.spring.cloud.consumer.mapper.AgentShortUrlMapper">
+  <resultMap id="BaseResultMap" type="com.cydeer.spring.cloud.consumer.domain.AgentShortUrl">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="agent_id" jdbcType="BIGINT" property="agentId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="source_url" jdbcType="VARCHAR" property="sourceUrl" />
+    <result column="source_hash" jdbcType="BIGINT" property="sourceHash" />
+    <result column="short_url" jdbcType="VARCHAR" property="shortUrl" />
+    <result column="invalid_time" jdbcType="TIMESTAMP" property="invalidTime" />
+    <result column="page_view" jdbcType="BIGINT" property="pageView" />
+    <result column="unique_view" jdbcType="BIGINT" property="uniqueView" />
+    <result column="deleted" jdbcType="BIT" property="deleted" />
+    <result column="gmt_created" jdbcType="TIMESTAMP" property="gmtCreated" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, agent_id, name, source_url, source_hash, short_url, invalid_time, page_view, 
+    unique_view, deleted, gmt_created, gmt_modified
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from agent_short_url
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from agent_short_url
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.cydeer.spring.cloud.consumer.domain.AgentShortUrl">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into agent_short_url (agent_id, name, source_url, 
+      source_hash, short_url, invalid_time, 
+      page_view, unique_view, deleted, 
+      gmt_created, gmt_modified)
+    values (#{agentId,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{sourceUrl,jdbcType=VARCHAR}, 
+      #{sourceHash,jdbcType=BIGINT}, #{shortUrl,jdbcType=VARCHAR}, #{invalidTime,jdbcType=TIMESTAMP}, 
+      #{pageView,jdbcType=BIGINT}, #{uniqueView,jdbcType=BIGINT}, #{deleted,jdbcType=BIT}, 
+      #{gmtCreated,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.cydeer.spring.cloud.consumer.domain.AgentShortUrl">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into agent_short_url
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="agentId != null">
+        agent_id,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="sourceUrl != null">
+        source_url,
+      </if>
+      <if test="sourceHash != null">
+        source_hash,
+      </if>
+      <if test="shortUrl != null">
+        short_url,
+      </if>
+      <if test="invalidTime != null">
+        invalid_time,
+      </if>
+      <if test="pageView != null">
+        page_view,
+      </if>
+      <if test="uniqueView != null">
+        unique_view,
+      </if>
+      <if test="deleted != null">
+        deleted,
+      </if>
+      <if test="gmtCreated != null">
+        gmt_created,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="agentId != null">
+        #{agentId,jdbcType=BIGINT},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceUrl != null">
+        #{sourceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceHash != null">
+        #{sourceHash,jdbcType=BIGINT},
+      </if>
+      <if test="shortUrl != null">
+        #{shortUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="invalidTime != null">
+        #{invalidTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pageView != null">
+        #{pageView,jdbcType=BIGINT},
+      </if>
+      <if test="uniqueView != null">
+        #{uniqueView,jdbcType=BIGINT},
+      </if>
+      <if test="deleted != null">
+        #{deleted,jdbcType=BIT},
+      </if>
+      <if test="gmtCreated != null">
+        #{gmtCreated,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.cydeer.spring.cloud.consumer.domain.AgentShortUrl">
+    update agent_short_url
+    <set>
+      <if test="agentId != null">
+        agent_id = #{agentId,jdbcType=BIGINT},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceUrl != null">
+        source_url = #{sourceUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceHash != null">
+        source_hash = #{sourceHash,jdbcType=BIGINT},
+      </if>
+      <if test="shortUrl != null">
+        short_url = #{shortUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="invalidTime != null">
+        invalid_time = #{invalidTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pageView != null">
+        page_view = #{pageView,jdbcType=BIGINT},
+      </if>
+      <if test="uniqueView != null">
+        unique_view = #{uniqueView,jdbcType=BIGINT},
+      </if>
+      <if test="deleted != null">
+        deleted = #{deleted,jdbcType=BIT},
+      </if>
+      <if test="gmtCreated != null">
+        gmt_created = #{gmtCreated,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.cydeer.spring.cloud.consumer.domain.AgentShortUrl">
+    update agent_short_url
+    set agent_id = #{agentId,jdbcType=BIGINT},
+      name = #{name,jdbcType=VARCHAR},
+      source_url = #{sourceUrl,jdbcType=VARCHAR},
+      source_hash = #{sourceHash,jdbcType=BIGINT},
+      short_url = #{shortUrl,jdbcType=VARCHAR},
+      invalid_time = #{invalidTime,jdbcType=TIMESTAMP},
+      page_view = #{pageView,jdbcType=BIGINT},
+      unique_view = #{uniqueView,jdbcType=BIGINT},
+      deleted = #{deleted,jdbcType=BIT},
+      gmt_created = #{gmtCreated,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
