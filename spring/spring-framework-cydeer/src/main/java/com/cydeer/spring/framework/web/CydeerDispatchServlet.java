@@ -1,9 +1,6 @@
 package com.cydeer.spring.framework.web;
 
-import com.cydeer.spring.framework.annotation.XzAutowired;
-import com.cydeer.spring.framework.annotation.XzController;
-import com.cydeer.spring.framework.annotation.XzRequestMapping;
-import com.cydeer.spring.framework.annotation.XzService;
+import com.cydeer.spring.framework.annotation.*;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletException;
@@ -12,14 +9,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author song.z
@@ -58,10 +53,37 @@ public class CydeerDispatchServlet extends HttpServlet {
         requestPath = requestPath.replace(contextPath, "").replaceAll("/+", "/");
         if (!handlerMap.containsKey(requestPath)) {
             resp.getWriter().write(" 404 NOT FUND");
+            return;
         }
         Method method = handlerMap.get(requestPath);
-        method.invoke(beans.get(method.getDeclaringClass().getName()),
-                      new Object[]{req, resp, req.getParameter("name")});
+        Map<String, String[]> params = req.getParameterMap();
+        Class<?>[] paramsTypes = method.getParameterTypes();
+        Object[] paramsValues = new Object[paramsTypes.length];
+        for (int i = 0; i < paramsTypes.length; i++) {
+            Class<?> paramType = paramsTypes[i];
+            if (paramType == HttpServletRequest.class) {
+                paramsValues[i] = req;
+            } else if (paramType == HttpServletResponse.class) {
+                paramsValues[i] = resp;
+            } else if (paramType == String.class) {
+                Annotation[][] annotations = method.getParameterAnnotations();
+                for (int j = 0; j < annotations.length; j++) {
+                    Annotation[] paramAnnotations = annotations[j];
+                    for (Annotation a : paramAnnotations) {
+                        if (a instanceof XzRequestParam) {
+                            String paramName = ((XzRequestParam) a).value();
+                            if (StringUtils.hasText(paramName)) {
+                                paramsValues[i] = Arrays.toString(params.get(paramName))
+                                        .replaceAll("\\[|\\]", "")
+                                        .replaceAll("\\s", ",");
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        method.invoke(beans.get(method.getDeclaringClass().getName()), paramsValues);
     }
 
     @Override

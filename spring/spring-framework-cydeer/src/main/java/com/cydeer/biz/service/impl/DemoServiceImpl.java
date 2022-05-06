@@ -22,7 +22,7 @@ public class DemoServiceImpl implements DemoService {
 
     @Override
     public String add(String name) {
-        data.put(name, name);
+        data.put(name, "data:" + name);
         return name;
     }
 }

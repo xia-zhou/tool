@@ -23,7 +23,7 @@ public class DemoController {
 
 
     @XzRequestMapping("/get")
-    public void get(HttpServletRequest req, HttpServletResponse resp, @XzRequestParam("name") String name) {
+    public void get(HttpServletRequest req, HttpServletResponse resp, @XzRequestParam("namet") String name) {
         try {
             resp.getWriter().write(demoService.get(name));
         } catch (IOException e) {
