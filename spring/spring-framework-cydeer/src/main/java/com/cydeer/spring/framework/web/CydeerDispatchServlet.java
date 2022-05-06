@@ -16,10 +16,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author song.z
@@ -28,6 +28,12 @@ import java.util.Set;
 public class CydeerDispatchServlet extends HttpServlet {
 
     private Map<String, Object> map = new HashMap<>();
+
+    private List<String> classNames = new ArrayList<>();
+
+    private Map<String, Object> beans = new HashMap<>();
+
+    private Map<String, Method> handlerMap = new HashMap<>();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -50,19 +56,33 @@ public class CydeerDispatchServlet extends HttpServlet {
         String requestPath = req.getRequestURI();
         String contextPath = req.getContextPath();
         requestPath = requestPath.replace(contextPath, "").replaceAll("/+", "/");
-        if (!map.containsKey(requestPath)) {
+        if (!handlerMap.containsKey(requestPath)) {
             resp.getWriter().write(" 404 NOT FUND");
         }
-        Method method = (Method) map.get(requestPath);
-        method.invoke(map.get(method.getDeclaringClass().getName()), new Object[]{req, resp, req.getParameter("name")});
+        Method method = handlerMap.get(requestPath);
+        method.invoke(beans.get(method.getDeclaringClass().getName()),
+                      new Object[]{req, resp, req.getParameter("name")});
     }
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
+
+        // 扫描 获取到对应的所有全限定类名
         doScan("com.cydeer.biz");
+
+        // 初始化类，保存到beans中
+        doInstance();
+
+        // 依赖注入
+        doAutowired();
+
+        // 初始化 url和对应的method映射
+        doInitHandlerMapping();
+    }
+
+    private void doInitHandlerMapping() {
         try {
-            Set<String> set = new HashSet<>(map.keySet());
-            for (String className : set) {
+            for (String className : classNames) {
                 Class<?> clazz = Class.forName(className);
                 if (clazz.isAnnotationPresent(XzController.class)) {
                     String basePath = "";
@@ -77,32 +97,18 @@ public class CydeerDispatchServlet extends HttpServlet {
                         }
                         XzRequestMapping mapping = method.getAnnotation(XzRequestMapping.class);
                         String url = basePath + mapping.value();
-                        map.put(url, method);
-                    }
-                    map.put(className, clazz.newInstance());
-                }
-                if (clazz.isAnnotationPresent(XzService.class)) {
-                    XzService xzService = clazz.getAnnotation(XzService.class);
-                    String beanName = xzService.value();
-                    if (!StringUtils.hasText(beanName)) {
-                        beanName = clazz.getName();
-                    }
-                    Object instance = clazz.newInstance();
-                    map.put(beanName, instance);
-                    for (Class<?> anInterface : clazz.getInterfaces()) {
-                        map.put(anInterface.getName(), instance);
+                        handlerMap.put(url, method);
                     }
                 }
             }
-
-        } catch (Exception e) {
-
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
-        for (Object value : map.values()) {
+    }
+
+    private void doAutowired() {
+        for (Object value : beans.values()) {
             if (value == null) {
-                continue;
-            }
-            if (!value.getClass().isAnnotationPresent(XzController.class)) {
                 continue;
             }
             for (Field declaredField : value.getClass().getDeclaredFields()) {
@@ -116,12 +122,42 @@ public class CydeerDispatchServlet extends HttpServlet {
                 }
                 declaredField.setAccessible(true);
                 try {
-                    declaredField.set(map.get(value.getClass().getName()), map.get(autowiredBeanName));
+                    declaredField.set(beans.get(value.getClass().getName()), beans.get(autowiredBeanName));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    private void doInstance() {
+        try {
+            for (String className : classNames) {
+                Class<?> clazz = Class.forName(className);
+                if (clazz.isAnnotationPresent(XzController.class)) {
+                    beans.put(className, clazz.newInstance());
+                }
+                if (clazz.isAnnotationPresent(XzService.class)) {
+                    XzService xzService = clazz.getAnnotation(XzService.class);
+                    String beanName = xzService.value();
+                    if (!StringUtils.hasText(beanName)) {
+                        beanName = clazz.getName();
+                    }
+                    Object instance = clazz.newInstance();
+                    beans.put(beanName, instance);
+                    for (Class<?> anInterface : clazz.getInterfaces()) {
+                        beans.put(anInterface.getName(), instance);
+                    }
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void doScan(String packageName) {
@@ -132,7 +168,7 @@ public class CydeerDispatchServlet extends HttpServlet {
                 doScan(packageName + "." + file.getName());
             } else if (file.getName().endsWith(".class")) {
                 String className = packageName + "." + file.getName().replace(".class", "");
-                map.put(className, null);
+                classNames.add(className);
             }
         }
     }
