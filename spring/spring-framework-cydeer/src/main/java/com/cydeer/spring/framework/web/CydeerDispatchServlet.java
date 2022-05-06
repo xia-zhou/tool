@@ -77,14 +77,21 @@ public class CydeerDispatchServlet extends HttpServlet {
                 return;
             }
 
-            paramsValues[paramIndex.getValue()] = Arrays.toString(value).replaceAll("\\[|\\]", "").replaceAll("\\s",
-                                                                                                              ",");
+            paramsValues[paramIndex.getValue()] = convert(paramsTypes[paramIndex.getValue()], value);
         }
         Object result = handler.getMethod().invoke(handler.getControllerBeans(), paramsValues);
-        if (result == null || result instanceof Void) {
+        if (result == null) {
             return;
         }
         resp.getWriter().write(result.toString());
+    }
+
+    private Object convert(Class<?> paramsType, String[] value) {
+        if (paramsType == String.class) {
+            return Arrays.toString(value).replaceAll("\\[|\\]", "").replaceAll("\\s", ",");
+        }
+        // todo 其他类型支持
+        return value;
     }
 
     private HttpRequestHandler getHandler(HttpServletRequest req) {
