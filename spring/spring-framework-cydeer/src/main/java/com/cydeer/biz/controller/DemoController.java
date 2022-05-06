@@ -8,7 +8,6 @@ import com.cydeer.spring.framework.annotation.XzRequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * @author song.z
@@ -23,21 +22,13 @@ public class DemoController {
 
 
     @XzRequestMapping("/get")
-    public void get(HttpServletRequest req, HttpServletResponse resp, @XzRequestParam("namet") String name) {
-        try {
-            resp.getWriter().write(demoService.get(name));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public String get(HttpServletRequest req, HttpServletResponse resp, @XzRequestParam("namet") String name) {
+        return demoService.get(name);
     }
 
     @XzRequestMapping("/add")
-    public void add(HttpServletRequest req, HttpServletResponse resp, @XzRequestParam("name") String name) {
-        try {
-            resp.getWriter().write(demoService.add(name));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public String add(@XzRequestParam("name") String name) {
+        return demoService.add(name);
     }
 
 

@@ -1,6 +1,9 @@
 package com.cydeer.spring.framework.web;
 
-import com.cydeer.spring.framework.annotation.*;
+import com.cydeer.spring.framework.annotation.XzAutowired;
+import com.cydeer.spring.framework.annotation.XzController;
+import com.cydeer.spring.framework.annotation.XzRequestMapping;
+import com.cydeer.spring.framework.annotation.XzService;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletException;
@@ -9,12 +12,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author song.z
@@ -29,6 +32,8 @@ public class CydeerDispatchServlet extends HttpServlet {
     private Map<String, Object> beans = new HashMap<>();
 
     private Map<String, Method> handlerMap = new HashMap<>();
+
+    private List<HttpRequestHandler> handlers = new ArrayList<>();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -48,42 +53,49 @@ public class CydeerDispatchServlet extends HttpServlet {
 
     private void doDispatch(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, InvocationTargetException, IllegalAccessException {
+
+        HttpRequestHandler handler = getHandler(req);
+        if (handler == null) {
+            resp.getWriter().write("404 NOT FOUND");
+            return;
+        }
+        Map<String, String[]> params = req.getParameterMap();
+        Class<?>[] paramsTypes = handler.getMethod().getParameterTypes();
+        Object[] paramsValues = new Object[paramsTypes.length];
+        for (Map.Entry<String, Integer> paramIndex : handler.getParamsIndexMapping().entrySet()) {
+            if (Objects.equals(paramIndex.getKey(), HttpServletResponse.class.getName())) {
+                paramsValues[paramIndex.getValue()] = resp;
+                continue;
+            }
+            if (Objects.equals(paramIndex.getKey(), HttpServletRequest.class.getName())) {
+                paramsValues[paramIndex.getValue()] = req;
+                continue;
+            }
+            String[] value = params.get(paramIndex.getKey());
+            if (value == null || value.length == 0) {
+                resp.getWriter().write("param is not present");
+                return;
+            }
+
+            paramsValues[paramIndex.getValue()] = Arrays.toString(value).replaceAll("\\[|\\]", "").replaceAll("\\s",
+                                                                                                              ",");
+        }
+        Object result = handler.getMethod().invoke(handler.getControllerBeans(), paramsValues);
+        if (result == null || result instanceof Void) {
+            return;
+        }
+        resp.getWriter().write(result.toString());
+    }
+
+    private HttpRequestHandler getHandler(HttpServletRequest req) {
         String requestPath = req.getRequestURI();
         String contextPath = req.getContextPath();
         requestPath = requestPath.replace(contextPath, "").replaceAll("/+", "/");
-        if (!handlerMap.containsKey(requestPath)) {
-            resp.getWriter().write(" 404 NOT FUND");
-            return;
-        }
-        Method method = handlerMap.get(requestPath);
-        Map<String, String[]> params = req.getParameterMap();
-        Class<?>[] paramsTypes = method.getParameterTypes();
-        Object[] paramsValues = new Object[paramsTypes.length];
-        for (int i = 0; i < paramsTypes.length; i++) {
-            Class<?> paramType = paramsTypes[i];
-            if (paramType == HttpServletRequest.class) {
-                paramsValues[i] = req;
-            } else if (paramType == HttpServletResponse.class) {
-                paramsValues[i] = resp;
-            } else if (paramType == String.class) {
-                Annotation[][] annotations = method.getParameterAnnotations();
-                for (int j = 0; j < annotations.length; j++) {
-                    Annotation[] paramAnnotations = annotations[j];
-                    for (Annotation a : paramAnnotations) {
-                        if (a instanceof XzRequestParam) {
-                            String paramName = ((XzRequestParam) a).value();
-                            if (StringUtils.hasText(paramName)) {
-                                paramsValues[i] = Arrays.toString(params.get(paramName))
-                                        .replaceAll("\\[|\\]", "")
-                                        .replaceAll("\\s", ",");
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-        method.invoke(beans.get(method.getDeclaringClass().getName()), paramsValues);
+        String finalRequestPath = requestPath;
+        return handlers.stream()
+                .filter(handler -> handler.getPattern().matcher(finalRequestPath).matches())
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -103,28 +115,25 @@ public class CydeerDispatchServlet extends HttpServlet {
     }
 
     private void doInitHandlerMapping() {
-        try {
-            for (String className : classNames) {
-                Class<?> clazz = Class.forName(className);
-                if (clazz.isAnnotationPresent(XzController.class)) {
-                    String basePath = "";
-                    if (clazz.isAnnotationPresent(XzRequestMapping.class)) {
-                        XzRequestMapping xzRequestMapping = clazz.getAnnotation(XzRequestMapping.class);
-                        basePath = xzRequestMapping.value();
+        for (Map.Entry<String, Object> entry : beans.entrySet()) {
+            Class<?> clazz = entry.getValue().getClass();
+            if (clazz.isAnnotationPresent(XzController.class)) {
+                String basePath = "";
+                if (clazz.isAnnotationPresent(XzRequestMapping.class)) {
+                    XzRequestMapping xzRequestMapping = clazz.getAnnotation(XzRequestMapping.class);
+                    basePath = xzRequestMapping.value();
+                }
+                Method[] methods = clazz.getMethods();
+                for (Method method : methods) {
+                    if (!method.isAnnotationPresent(XzRequestMapping.class)) {
+                        continue;
                     }
-                    Method[] methods = clazz.getMethods();
-                    for (Method method : methods) {
-                        if (!method.isAnnotationPresent(XzRequestMapping.class)) {
-                            continue;
-                        }
-                        XzRequestMapping mapping = method.getAnnotation(XzRequestMapping.class);
-                        String url = basePath + mapping.value();
-                        handlerMap.put(url, method);
-                    }
+                    XzRequestMapping mapping = method.getAnnotation(XzRequestMapping.class);
+                    String url = "/" + basePath + "/" + mapping.value();
+                    handlers.add(new HttpRequestHandler(entry.getValue(), method,
+                                                        Pattern.compile(url.replaceAll("/+", "/"))));
                 }
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
     }
 
