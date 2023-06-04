@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--    <alias name="dataSource" alias="shardingDatasourceAlias"/>-->
+
+    <!--    <sharding:inline-strategy id="userTableStrategy" sharding-column="uid"-->
+    <!--                              algorithm-expression="user_$->{sprintf('%03d', Long.valueOf(uid) % 128)}"/>-->
+
+    <!--    <sharding:inline-strategy id="userRelationTableStrategy" sharding-column="user_id"-->
+    <!--                              algorithm-expression="user_relation_$->{sprintf('%02d', user_id % 64)}"/>-->
+
+    <!--    <sharding:inline-strategy id="openidUserRelationTableStrategy" sharding-column="open_id"-->
+    <!--                              algorithm-expression="openid_user_relation_$->{sprintf('%03d', java.lang.Math.abs(open_id.hashCode()) % 128)}"/>-->
+
+    <!--    <sharding:inline-strategy id="userOpenidRelationTableStrategy" sharding-column="user_id"-->
+    <!--                              algorithm-expression="user_openid_relation_$->{sprintf('%03d', user_id % 128)}"/>-->
+
+
+    <!--    <sharding:data-source id="shardingDataSource">-->
+    <!--        <sharding:sharding-rule data-source-names="shardingDatasourceAlias">-->
+    <!--            <sharding:table-rules>-->
+    <!--                <sharding:table-rule logic-table="user"-->
+    <!--                                     actual-data-nodes="shardingDatasourceAlias.user_$->{(0..127).collect{sprintf('%03d', it)}}"-->
+    <!--                                     table-strategy-ref="userTableStrategy"/>-->
+
+    <!--                <sharding:table-rule logic-table="user_relation"-->
+    <!--                                     actual-data-nodes="shardingDatasourceAlias.user_relation_$->{(0..63).collect{sprintf('%02d', it)}}"-->
+    <!--                                     table-strategy-ref="userRelationTableStrategy"/>-->
+
+    <!--                <sharding:table-rule logic-table="openid_user_relation"-->
+    <!--                                     actual-data-nodes="shardingDatasourceAlias.openid_user_relation_$->{(0..127).collect{sprintf('%03d', it)}}"-->
+    <!--                                     table-strategy-ref="openidUserRelationTableStrategy"/>-->
+
+    <!--                <sharding:table-rule logic-table="user_openid_relation"-->
+    <!--                                     actual-data-nodes="shardingDatasourceAlias.user_openid_relation_$->{(0..127).collect{sprintf('%03d', it)}}"-->
+    <!--                                     table-strategy-ref="userOpenidRelationTableStrategy"/>-->
+    <!--                </sharding:table-rules>-->
+    <!--        </sharding:sharding-rule>-->
+    <!--        <sharding:props>-->
+    <!--            <prop key="sql.show">true</prop>-->
+    <!--        </sharding:props>-->
+    <!--    </sharding:data-source>-->
+
+</beans>

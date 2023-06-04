@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cydeer.user.dal.sharding.mapper.OpenUserRelationMapper">
+    <resultMap id="BaseResultMap" type="com.cydeer.user.dal.sharding.dataobject.OpenUserRelation">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_created" jdbcType="TIMESTAMP" property="gmtCreated"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="open_id" jdbcType="VARCHAR" property="openId"/>
+        <result column="platform_id" jdbcType="VARCHAR" property="platformId"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="union_id" jdbcType="VARCHAR" property="unionId"/>
+        <result column="app_id" jdbcType="VARCHAR" property="appId"/>
+        <result column="sl_union_id" jdbcType="BIGINT" property="slUnionId"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_created, gmt_modified, open_id, platform_id, user_id, union_id, app_id, sl_union_id
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from openid_user_relation
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="findByOpenId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from openid_user_relation
+        where open_id = #{openId}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from openid_user_relation
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.cydeer.user.dal.sharding.dataobject.OpenUserRelation">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into openid_user_relation (gmt_created, gmt_modified, open_id,
+        platform_id, user_id, union_id,
+        app_id, sl_union_id)
+        values (#{gmtCreated,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, #{openId,jdbcType=VARCHAR},
+        #{platformId,jdbcType=VARCHAR}, #{userId,jdbcType=BIGINT}, #{unionId,jdbcType=VARCHAR},
+        #{appId,jdbcType=VARCHAR}, #{slUnionId,jdbcType=BIGINT})
+    </insert>
+    <insert id="insertSelective" parameterType="com.cydeer.user.dal.sharding.dataobject.OpenUserRelation">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into openid_user_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="gmtCreated != null">
+                gmt_created,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="openId != null">
+                open_id,
+            </if>
+            <if test="platformId != null">
+                platform_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="unionId != null">
+                union_id,
+            </if>
+            <if test="appId != null">
+                app_id,
+            </if>
+            <if test="slUnionId != null">
+                sl_union_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="gmtCreated != null">
+                #{gmtCreated,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="openId != null">
+                #{openId,jdbcType=VARCHAR},
+            </if>
+            <if test="platformId != null">
+                #{platformId,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="unionId != null">
+                #{unionId,jdbcType=VARCHAR},
+            </if>
+            <if test="appId != null">
+                #{appId,jdbcType=VARCHAR},
+            </if>
+            <if test="slUnionId != null">
+                #{slUnionId,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.cydeer.user.dal.sharding.dataobject.OpenUserRelation">
+        update openid_user_relation
+        <set>
+            <if test="gmtCreated != null">
+                gmt_created = #{gmtCreated,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="openId != null">
+                open_id = #{openId,jdbcType=VARCHAR},
+            </if>
+            <if test="platformId != null">
+                platform_id = #{platformId,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="unionId != null">
+                union_id = #{unionId,jdbcType=VARCHAR},
+            </if>
+            <if test="appId != null">
+                app_id = #{appId,jdbcType=VARCHAR},
+            </if>
+            <if test="slUnionId != null">
+                sl_union_id = #{slUnionId,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.cydeer.user.dal.sharding.dataobject.OpenUserRelation">
+        update openid_user_relation
+        set gmt_created  = #{gmtCreated,jdbcType=TIMESTAMP},
+            gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            open_id      = #{openId,jdbcType=VARCHAR},
+            platform_id  = #{platformId,jdbcType=VARCHAR},
+            user_id      = #{userId,jdbcType=BIGINT},
+            union_id     = #{unionId,jdbcType=VARCHAR},
+            app_id       = #{appId,jdbcType=VARCHAR},
+            sl_union_id  = #{slUnionId,jdbcType=BIGINT}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+</mapper>
