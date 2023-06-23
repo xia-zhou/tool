@@ -2,8 +2,7 @@ package com.cydeer.tdd;
 
 import com.cydeer.tdd.exception.IllegalOptionException;
 import com.cydeer.tdd.exception.IllegalTypeException;
-import com.cydeer.tdd.parser.BooleanOptionParser;
-import com.cydeer.tdd.parser.SingleValueOptionParser;
+import com.cydeer.tdd.parser.OptionParserFactory;
 import com.cydeer.tdd.parser.OptionParser;
 
 import java.lang.reflect.Constructor;
@@ -18,11 +17,14 @@ import java.util.Map;
  */
 public class Args {
 
-    private final static Map<Class<?>, OptionParser> PARSER = Map.of(boolean.class, new BooleanOptionParser(),
-                                                                     int.class, new SingleValueOptionParser<>(0,
-                                                                                                              Integer::parseInt),
-                                                                     String.class, new SingleValueOptionParser<>("",
-                                                                                                                 String::valueOf));
+    private final static Map<Class<?>, OptionParser> PARSER = Map.of(boolean.class,
+                                                                     OptionParserFactory.boolParser(),
+                                                                     int.class,
+                                                                     OptionParserFactory.singleOptionParser(0,
+                                                                                                            Integer::parseInt),
+                                                                     String.class,
+                                                                     OptionParserFactory.singleOptionParser("",
+                                                                                                            String::valueOf));
 
     public static <T> T parse(Class<T> optionClass, String... args) {
         Constructor<?> constructor = optionClass.getDeclaredConstructors()[0];
