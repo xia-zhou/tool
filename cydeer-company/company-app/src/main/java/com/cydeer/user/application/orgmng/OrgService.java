@@ -39,4 +39,12 @@ public class OrgService {
         orgGateway.updateOrg(org);
         return null;
     }
+
+    public Long cancelOrg(Long orgId, Long tenantId, UserDTO user) {
+        Org org = orgGateway.findByOrgId(orgId);
+        AssertUtils.isNotNull(org, "组织不存在");
+        orgHandler.cancel(org, user.getUserId());
+        orgGateway.updateOrg(org);
+        return orgId;
+    }
 }
