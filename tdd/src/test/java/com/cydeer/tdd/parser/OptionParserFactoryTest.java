@@ -22,6 +22,51 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class OptionParserFactoryTest {
 
+    @Nested
+    class ListOptionParserTest {
+        /**
+         * happy path
+         * <p>
+         * -g this is a list
+         */
+        @Test
+        public void shoutParseStringArrayAsOptionValue() {
+            assertArrayEquals(new String[]{"this", "is", "a", "list"},
+                              OptionParserFactory.listOptionParser(String[]::new, String::valueOf)
+                                      .parse(List.of("-g", "this", "is", "a", "list"), option("g")));
+        }
+
+        /**
+         * default value String[]
+         */
+        @Test
+        public void shoutParseStringArrayDefaultValue() {
+            assertArrayEquals(new String[0], OptionParserFactory.listOptionParser(String[]::new, String::valueOf)
+                    .parse(List.of(), option("g")));
+        }
+
+        /**
+         * happy path
+         * <p>
+         * -d 1 2 -3 5
+         */
+        @Test
+        public void shoutParseIntArrayAsOptionValue() {
+            assertArrayEquals(new Integer[]{1, 2, -3, 5},
+                              OptionParserFactory.listOptionParser(Integer[]::new, Integer::parseInt)
+                                      .parse(List.of("-d", "1", "2", "-3", "5"), option("d")));
+        }
+
+        /**
+         * default value int[]
+         */
+        @Test
+        public void shoutParseIntArrayDefaultValue() {
+            assertArrayEquals(new Integer[0], OptionParserFactory.listOptionParser(Integer[]::new, String::valueOf)
+                    .parse(List.of(), option("d")));
+        }
+    }
+
 
     @Nested
     class SingleOptionParserTest {
